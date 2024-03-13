@@ -1,0 +1,19 @@
+{
+  "name": "taskcraft",
+  "version": "1.0.0",
+  "productName": "Task Craft",
+  "description": "Task Craft",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package-win": "electron-packager . taskcraft --overwrite --asar=true --icon=src/image/icon.ico --prune=true --out=release-builds --version-string.CompanyName=YSSF --version-string.FileDescription=TaskCraft --version-string.ProductName=\"Task Craft\""
+  },
+  "keywords": [],
+  "author": "YSSF",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^29.1.1",
+    "electron-packager": "^17.1.2"
+  }
+}

@@ -1,0 +1,313 @@
+$common-px: 8px;
+$tilebar-color: #222;
+$action-color-hover: #333;
+$action-color-active: #444;
+$close-color: #f44336;
+$close-color-hover: #d32f2f;
+$primary-color: #3a3a3a;
+$secondary-color: #4e4e4e;
+$tertiary-color: #5e5e5e;
+$line-color: #666;
+$accent-color: #94c7fc;
+$accent-color-bright: #76afec;
+
+html {
+    color-scheme: light dark;
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+}
+
+#tilebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    background-color: #222;
+    padding: $common-px;
+    user-select: none;
+    z-index: 999999;
+
+    .title {
+        display: flex;
+        align-items: center;
+        gap: $common-px / 1.5;
+        pointer-events: none;
+    }
+
+    .actions {
+        position: relative;
+        right: $common-px;
+        display: flex;
+    }
+
+    button {
+        all: unset;
+        background-color: transparent;
+        border: none;
+        outline: none;
+        margin: 0;
+        width: 2.5rem;
+        height: calc(100% + $common-px * 2);
+        position: relative;
+        top: -$common-px;
+        font-weight: bold;
+        font-size: $common-px * 2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background 200ms;
+
+        &:hover {
+            background-color: $action-color-hover;
+        }
+
+        &:active {
+            background-color: $action-color-active;
+        }
+
+        &:is(#close):hover {
+            background-color: $close-color;
+        }
+
+        &:is(#close):active {
+            background-color: $close-color-hover;
+        }
+    }
+}
+
+input,
+button {
+    outline: none;
+    background-color: $primary-color;
+    outline: none;
+    padding: $common-px;
+    border-radius: $common-px;
+    border: 1px solid $line-color;
+
+    &:is(button) {
+        cursor: pointer;
+    }
+
+    &:is(input) {
+        transition: border 200ms;
+
+        &:focus {
+            border-bottom: 2px solid $accent-color;
+        }
+    }
+}
+
+.accent {
+    background-color: $accent-color;
+    border: 1px solid $accent-color-bright;
+}
+
+.main-input {
+    width: 3in;
+}
+
+.toolbar {
+    display: flex;
+    position: fixed;
+    background-color: $primary-color;
+    width: 100%;
+    z-index: 10;
+
+    .tool-name {
+        padding: 0 $common-px / 2 0 $common-px / 2;
+        cursor: default;
+        transition: background 200ms;
+
+        &:hover {
+            background-color: $secondary-color;
+        }
+    }
+
+    .tool {
+        position: relative;
+
+        .tools {
+            display: none;
+            position: absolute;
+            background-color: $primary-color;
+            padding: $common-px / 2;
+            margin: $common-px / 2;
+            border-radius: $common-px;
+            width: max-content;
+            box-shadow: 0 0 3px #000;
+            opacity: 0;
+            transform: translateY(-4px);
+            z-index: 10;
+            transition: 200ms;
+            transition-property: transform, opacity;
+
+            div {
+                cursor: default;
+                padding: $common-px;
+                border-radius: $common-px;
+                transition: background 200ms;
+
+                &:hover {
+                    background-color: $secondary-color;
+                }
+            }
+        }
+    }
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    .header {
+        display: flex;
+        gap: $common-px / 2;
+    }
+
+    .content {
+        background-color: $primary-color;
+        width: 3.5in;
+        height: 3.5in;
+        padding: $common-px;
+        margin-top: $common-px;
+        border-radius: $common-px;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+
+        .task-actions {
+            display: flex;
+            gap: $common-px / 3;
+        }
+        
+        .task {
+            background-color: $secondary-color;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: $common-px;
+            margin-bottom: $common-px / 2;
+            padding: $common-px;
+            opacity: 0;
+            transform: scale(.8);
+            transition: 200ms;
+            transition-property: transform, opacity;
+
+            &:is(&:last-child) {
+                margin-bottom: 0;
+            }
+
+            .task-name {
+                display: flex;
+                gap: $common-px / 2;
+
+                div {
+                    width: 2in;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+
+                    &::-webkit-scrollbar {
+                        width: 0;
+                        height: 0;
+                    }
+                }
+            }
+        }
+
+        .availability {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            margin: 0;
+        }
+    }
+}
+
+[data-ripple] {
+    position: relative;
+    overflow: hidden;
+    
+    .ripple {
+        background-color: #000;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        position: absolute;
+        pointer-events: none;
+        animation: ripple 600ms linear;
+    }
+}
+
+@keyframes ripple {
+    from {
+        width: 0;
+        height: 0;
+        opacity: .3;
+    }
+
+    to {
+        width: 500px;
+        height: 500px;
+        opacity: 0;
+    }
+}
+
+.find {
+    position: fixed;
+    left: 50%;
+    top: 5rem;
+    transform: translateX(-50%);
+    background-color: $primary-color;
+    box-shadow: 0 0 3px #000;
+    border-radius: $common-px;
+    padding: $common-px;
+    display: flex;
+    gap: $common-px / 2;
+    animation: popups 300ms forwards;
+}
+
+@keyframes popups {
+    from {
+        opacity: 0;
+        transform: scale(.8) translateX(-50%);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateX(-50%);
+    }
+}
+
+svg {
+    pointer-events: none;
+}
+
+::-webkit-scrollbar {
+    width: $common-px;
+    height: $common-px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: $secondary-color;
+    border-radius: $common-px;
+
+    &:hover {
+        background-color: $tertiary-color;
+    }
+}
