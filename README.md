@@ -19,6 +19,8 @@ git clone https://github.com/YSSF8/Task-Craft
 # Go into the repository
 cd path/to/repository
 # Install dependencies
+npm i electron electron-packager --save-dev
+# Run the app
 npm start
 ```
 
