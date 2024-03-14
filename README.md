@@ -17,7 +17,7 @@ To install Task Craft, you'll need to have Node.js and npm installed on your com
 # Clone this repository
 git clone https://github.com/YSSF8/Task-Craft
 # Go into the repository
-cd path/to/repository
+cd Task-Craft
 # Install dependencies
 npm i electron electron-packager --save-dev
 # Run the app
