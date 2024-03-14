@@ -1,6 +1,7 @@
 # Task Craft
 
 Task Craft is a desktop application built with Electron. It's designed to help you manage your tasks efficiently.
+Task Craft is made to be fast and efficient, allowing you to streamline your task management process effortlessly.
 
 ## Features
 
