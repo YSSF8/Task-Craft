@@ -199,6 +199,23 @@ button:is(input):focus {
   width: 0;
   height: 0;
 }
+.container .content .edit-mode {
+  border: 1px solid #94c7fc;
+  border-radius: 8px;
+  padding: 8px;
+  outline: none;
+}
+.container .content .task-over {
+  transform: scale(103%) !important;
+  background-color: #94c7fc;
+}
+.container .content .task-over button {
+  background-color: #76afec;
+  border-color: #76afec;
+}
+.container .content .task-over * {
+  color: #000;
+}
 .container .content .availability {
   position: absolute;
   left: 50%;

@@ -246,6 +246,7 @@ function applyTaskFunctionalities(task) {
             });
             label.style.overflow = 'auto';
             label.style.textOverflow = 'clip';
+            label.classList.add('edit-mode');
         } else {
             checkbox.style.removeProperty('display');
             label.setAttribute('contenteditable', false);
@@ -254,26 +255,49 @@ function applyTaskFunctionalities(task) {
             label.scrollLeft = 0;
             label.style.removeProperty('overflow');
             label.style.removeProperty('text-overflow');
+            label.title = originalLabel;
+            label.classList.remove('edit-mode');
         }
     });
 
     remove.addEventListener('click', () => {
+        let taskHeight = task.offsetHeight;
+        task.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
         task.style.transform = 'scale(.8)';
         task.style.opacity = 0;
 
+        let taskIndex = Array.from(content.children).indexOf(task);
+
+        Array.from(content.children).forEach((taskBelow, index) => {
+            if (index > taskIndex) {
+                taskBelow.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+                taskBelow.style.transitionDelay = `${(index - taskIndex) * 0.1}s`;
+                taskBelow.style.transform = `translateY(-${taskHeight}px)`;
+            }
+        });
+
         setTimeout(() => {
+            Array.from(content.children).forEach((taskBelow, index) => {
+                if (index > taskIndex) {
+                    taskBelow.style.transition = 'none';
+                    taskBelow.style.transitionDelay = 'none';
+                    taskBelow.style.transform = 'none';
+                }
+            });
+
             task.remove();
             allTasks = allTasks.filter((_, index) => index != task.getAttribute('data-pos'));
 
             if (content.children.length < 1) {
                 content.innerHTML = '<h3 class="availability">There are no available tasks at the moment &gt;_&lt;</h3>';
             }
-        }, 200);
+        }, 200 + (content.children.length - taskIndex) * 100);
     });
 
     task.addEventListener('dragstart', handleDragStart, false);
     task.addEventListener('dragenter', handleDragEnter, false);
     task.addEventListener('dragover', handleDragOver, false);
+    task.addEventListener('dragleave', handleDragLeave, false);
     task.addEventListener('drop', handleDrop, false);
 
     function handleDragStart(e) {
@@ -282,8 +306,8 @@ function applyTaskFunctionalities(task) {
         draggedTask = this;
     }
 
-    function handleDragEnter(e) {
-        this.classList.add('over');
+    function handleDragEnter() {
+        this.classList.add('task-over');
     }
 
     function handleDragOver(e) {
@@ -292,6 +316,12 @@ function applyTaskFunctionalities(task) {
         }
         e.dataTransfer.dropEffect = 'move';
         return false;
+    }
+
+    function handleDragLeave(e) {
+        if (!e.relatedTarget || !this.contains(e.relatedTarget)) {
+            this.classList.remove('task-over');
+        }
     }
 
     function handleDrop(e) {
@@ -309,7 +339,7 @@ function applyTaskFunctionalities(task) {
             tasks.forEach(task => this.parentNode.appendChild(task));
         }
 
-        this.classList.remove('over');
+        this.classList.remove('task-over');
         return false;
     }
 }
@@ -348,7 +378,7 @@ function setTask() {
 
 function taskFormat(title, name, checked = false) {
     return `
-    <div class="task-name">
+    <div class="task-name" title="Title: ${title}\nDate: ${new Date().toISOString().split('T')[0]}">
         <input type="checkbox" class="checkbox" title="Mark as done" ${checked ? 'checked' : ''}>
         <div title="${title}" ${checked ? 'style="opacity: .5;"' : ''}>${checked ? `<s>${name}</s>` : name}</div>
     </div>

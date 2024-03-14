@@ -229,6 +229,27 @@ button {
             }
         }
 
+        .edit-mode {
+            border: 1px solid $accent-color;
+            border-radius: $common-px;
+            padding: $common-px;
+            outline: none;
+        }
+
+        .task-over {
+            transform: scale(103%) !important;
+            background-color: $accent-color;
+
+            button {
+                background-color: $accent-color-bright;
+                border-color: $accent-color-bright;
+            }
+
+            * {
+                color: #000;
+            }
+        }
+
         .availability {
             position: absolute;
             left: 50%;
