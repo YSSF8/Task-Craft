@@ -1,6 +1,6 @@
 {
   "name": "taskcraft",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "productName": "Task Craft",
   "description": "Task Craft",
   "main": "src/index.js",
@@ -11,7 +11,7 @@
   },
   "keywords": [],
   "author": "YSSF",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^29.1.1",
     "electron-packager": "^17.1.2"

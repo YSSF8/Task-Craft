@@ -39,9 +39,38 @@ let opened = {};
 toolbar.querySelectorAll('.tool').forEach((tool, index) => {
     opened[index] = false;
 
+    const tools = tool.querySelector('.tools');
+    tools.querySelectorAll('div').forEach(toolAction => {
+        toolAction.addEventListener('click', () => {
+            switch (toolAction.getAttribute('data-action')) {
+                case 'quit':
+                    quit();
+                    break;
+                case 'find':
+                    find();
+                    break;
+                case 'delete-all':
+                    deleteAll();
+                    break;
+            }
+        });
+    });
+
     tool.addEventListener('click', () => {
+        for (let i in opened) {
+            if (i != index) {
+                const otherTool = toolbar.querySelectorAll('.tool')[i];
+                const otherTools = otherTool.querySelector('.tools');
+                otherTools.style.opacity = 0;
+                otherTools.style.transform = 'translateY(-4px)';
+                setTimeout(() => {
+                    otherTools.style.removeProperty('display');
+                }, 200);
+                opened[i] = false;
+            }
+        }
+
         opened[index] = !opened[index];
-        const tools = tool.querySelector('.tools');
 
         if (opened[index]) {
             tools.style.display = 'block';
@@ -56,81 +85,61 @@ toolbar.querySelectorAll('.tool').forEach((tool, index) => {
                 tools.style.removeProperty('display');
             }, 200);
         }
-
-        tools.querySelectorAll('div').forEach(toolAction => {
-            toolAction.addEventListener('click', () => {
-                switch (toolAction.getAttribute('data-action')) {
-                    case 'quit':
-                        quit();
-                        break;
-                    case 'find':
-                        find();
-                        break;
-                    case 'delete-all':
-                        allTasks = [];
-                        content.querySelectorAll('.task').forEach(task => {
-                            task.style.transform = 'scale(.8)';
-                            task.style.opacity = 0;
-                        });
-
-                        setTimeout(() => {
-                            content.innerHTML = '<h3 class="availability">There are no available tasks at the moment &gt;_&lt;</h3>';
-                        }, 200);
-                        break;
-                }
-            });
-        });
     });
 });
 
 document.addEventListener('click', e => {
-    if (e.target.closest('[data-action="save"]')) {
-        const tasksToSave = Array.from(document.querySelectorAll('.task')).map((task, index) => {
-            const originalLabel = task.querySelector('.task-name div').textContent;
-            return {
-                _task: originalLabel,
-                title: `Task: ${originalLabel}\nDate: ${new Date().toISOString().split('T')[0]}`,
-                index: index,
-                checked: task.querySelector('.task-name div s') ? true : false
-            };
-        });
-
-        window.electron.send('save', tasksToSave);
-    }
-    if (e.target.closest('[data-action="open"]')) {
-        const file = document.createElement('input');
-        file.type = 'file';
-        file.accept = 'application/json';
-        file.style.display = 'none';
-        document.body.appendChild(file);
-        file.click();
-
-        file.addEventListener('change', e => {
-            const loadedFile = e.target.files[0];
-            const fr = new FileReader();
-            fr.addEventListener('load', e => {
-                const result = JSON.parse(e.target.result);
-                allTasks = result;
-                content.innerHTML = '';
-                allTasks.forEach(t => {
-                    let task = document.createElement('div');
-                    task.classList.add('task');
-                    task.innerHTML = taskFormat(t.title, t._task, t.checked);
-                    task.draggable = true;
-                    applyTaskFunctionalities(task);
-                    content.appendChild(task);
-
-                    setTimeout(() => {
-                        task.style.transform = 'scale(1)';
-                        task.style.opacity = 1;
-                    });
-                });
-                file.remove();
-            });
-            fr.readAsText(loadedFile);
-        });
-    }
+    if (e.target.closest('[data-action="save"]')) save();
+    if (e.target.closest('[data-action="open"]')) open();
 });
+
+function save() {
+    const tasksToSave = Array.from(document.querySelectorAll('.task')).map((task, index) => {
+        const originalLabel = task.querySelector('.task-name div').textContent;
+        return {
+            _task: originalLabel,
+            title: `Task: ${originalLabel}\nDate: ${new Date().toISOString().split('T')[0]}`,
+            index: index,
+            checked: task.querySelector('.task-name div s') ? true : false
+        };
+    });
+
+    window.electron.send('save', tasksToSave);
+}
+
+function open() {
+    const file = document.createElement('input');
+    file.type = 'file';
+    file.accept = 'application/json';
+    file.style.display = 'none';
+    document.body.appendChild(file);
+    file.click();
+
+    file.addEventListener('change', e => {
+        const loadedFile = e.target.files[0];
+        const fr = new FileReader();
+        fr.addEventListener('load', e => {
+            const result = JSON.parse(e.target.result);
+            allTasks = result;
+            content.innerHTML = '';
+            allTasks.forEach(t => {
+                let task = document.createElement('div');
+                task.classList.add('task');
+                task.innerHTML = taskFormat(t.title, t._task, t.checked);
+                task.draggable = true;
+                applyTaskFunctionalities(task);
+                content.appendChild(task);
+
+                setTimeout(() => {
+                    task.style.transform = 'scale(1)';
+                    task.style.opacity = 1;
+                });
+            });
+            file.remove();
+        });
+        fr.readAsText(loadedFile);
+    });
+}
 
 function quit() {
     if (allTasks.length !== 0) {
@@ -141,6 +150,18 @@ function quit() {
     } else {
         window.electron.send('close');
     }
+}
+
+function deleteAll() {
+    allTasks = [];
+    content.querySelectorAll('.task').forEach(task => {
+        task.style.transform = 'scale(.8)';
+        task.style.opacity = 0;
+    });
+
+    setTimeout(() => {
+        content.innerHTML = '<h3 class="availability">There are no available tasks at the moment &gt;_&lt;</h3>';
+    }, 200);
 }
 
 let isFind = false;
@@ -195,6 +216,16 @@ function find() {
         }
     }
 }
+
+document.addEventListener('keydown', e => {
+    if (e.ctrlKey) {
+        if (e.key === 's') save();
+        if (e.key === 'o') open();
+        if (e.key === 'w') quit();
+        if (e.key === 'f') find();
+        if (e.key === 'Delete') deleteAll();
+    }
+});
 
 const mainInput = document.getElementById('main-input');
 const submitBtn = document.getElementById('submit-btn');
@@ -271,7 +302,6 @@ function applyTaskFunctionalities(task) {
         Array.from(content.children).forEach((taskBelow, index) => {
             if (index > taskIndex) {
                 taskBelow.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-                taskBelow.style.transitionDelay = `${(index - taskIndex) * 0.1}s`;
                 taskBelow.style.transform = `translateY(-${taskHeight}px)`;
             }
         });
@@ -280,8 +310,11 @@ function applyTaskFunctionalities(task) {
             Array.from(content.children).forEach((taskBelow, index) => {
                 if (index > taskIndex) {
                     taskBelow.style.transition = 'none';
-                    taskBelow.style.transitionDelay = 'none';
                     taskBelow.style.transform = 'none';
+
+                    setTimeout(() => {
+                        taskBelow.style.removeProperty('transition');
+                    }, 200);
                 }
             });
 
@@ -291,7 +324,7 @@ function applyTaskFunctionalities(task) {
             if (content.children.length < 1) {
                 content.innerHTML = '<h3 class="availability">There are no available tasks at the moment &gt;_&lt;</h3>';
             }
-        }, 200 + (content.children.length - taskIndex) * 100);
+        }, 200);
     });
 
     task.addEventListener('dragstart', handleDragStart, false);
