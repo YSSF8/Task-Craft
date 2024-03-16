@@ -89,6 +89,7 @@ button:is(input):focus {
 .accent {
   background-color: #94c7fc;
   border: 1px solid #76afec;
+  color: #000;
 }
 
 .main-input {
@@ -136,6 +137,7 @@ button:is(input):focus {
   width: 1.7in;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   transition: background 200ms;
 }
 .toolbar .tool .tools div:hover {
@@ -281,6 +283,62 @@ button:is(input):focus {
     transform: scale(1) translateX(-50%);
   }
 }
+.alert {
+  background-color: #3a3a3a;
+  box-shadow: 0 0 3px #000;
+  border-radius: 8px;
+  padding: 8px;
+  position: fixed;
+  left: 50%;
+  bottom: 8px;
+  opacity: 0;
+  transform: translate(-50%, 0);
+  z-index: 20;
+  transition: 300ms;
+  transition-property: transform, opacity;
+}
+
+.modal {
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000000;
+  transition: opacity 200ms;
+}
+.modal .modal-content {
+  background-color: #3a3a3a;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  border-radius: 8px;
+  padding: 8px;
+  width: 4in;
+  transition: transform 200ms;
+}
+.modal .modal-content .modal-footer {
+  float: right;
+}
+.modal .modal-content .modal-footer .modal-cancel {
+  border: none;
+  background-color: transparent;
+  transition: background 200ms;
+}
+.modal .modal-content .modal-footer .modal-cancel:hover {
+  background-color: #4e4e4e;
+}
+.modal .modal-content .modal-footer .modal-confirm {
+  font-weight: bold;
+  transition: box-shadow 200ms;
+}
+.modal .modal-content .modal-footer .modal-confirm:focus {
+  box-shadow: 0 0 0 4px #76afec;
+}
+
 svg {
   pointer-events: none;
 }

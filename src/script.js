@@ -98,7 +98,7 @@ function save() {
         const originalLabel = task.querySelector('.task-name div').textContent;
         return {
             _task: originalLabel,
-            title: `Task: ${originalLabel}\nDate: ${new Date().toISOString().split('T')[0]}`,
+            title: originalLabel,
             index: index,
             checked: task.querySelector('.task-name div s') ? true : false
         };
@@ -125,7 +125,7 @@ function open() {
             allTasks.forEach(t => {
                 let task = document.createElement('div');
                 task.classList.add('task');
-                task.innerHTML = taskFormat(t.title, t._task, t.checked);
+                task.innerHTML = taskFormat(t.title, escapeHTML(t._task), t.checked);
                 task.draggable = true;
                 applyTaskFunctionalities(task);
                 content.appendChild(task);
@@ -143,10 +143,11 @@ function open() {
 
 function quit() {
     if (allTasks.length !== 0) {
-        const confirmation = confirm('You have unsaved changes. Are you sure you want to exit?');
-        if (confirmation) {
-            window.electron.send('close');
-        }
+        confirm('You have unsaved changes. Are you sure you want to exit?').then(bool => {
+            if (bool) {
+                window.electron.send('close');
+            }
+        });
     } else {
         window.electron.send('close');
     }
@@ -258,6 +259,7 @@ function applyTaskFunctionalities(task) {
     const remove = task.querySelector('.remove');
     const hCheckbox = task.querySelector('.h-checkbox');
     let editIcon = edit.innerHTML;
+    let originalTitle;
 
     edit.addEventListener('click', () => {
         hCheckbox.click();
@@ -271,7 +273,6 @@ function applyTaskFunctionalities(task) {
                 <path d="M4.89163 13.2687L9.16582 17.5427L18.7085 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             `;
-            originalTitle = task.title;
             label.addEventListener('keydown', e => {
                 if (e.key === 'Enter') e.preventDefault();
             });
@@ -286,7 +287,8 @@ function applyTaskFunctionalities(task) {
             label.scrollLeft = 0;
             label.style.removeProperty('overflow');
             label.style.removeProperty('text-overflow');
-            label.title = originalLabel;
+            originalTitle = label.textContent;
+            label.title = originalTitle;
             label.classList.remove('edit-mode');
         }
     });
@@ -382,7 +384,6 @@ function setTask() {
 
     const task = document.createElement('div');
     task.classList.add('task');
-    task.title = `Task: ${mainInput.value}\nDate: ${new Date().toISOString().split('T')[0]}`;
     task.draggable = true;
     task.innerHTML = taskFormat(mainInput.value, escapeHTML(mainInput.value));
 
@@ -393,7 +394,6 @@ function setTask() {
 
     allTasks.push({
         _task: mainInput.value,
-        title: task.title,
         index: allTasks.length,
         checked: false
     });
@@ -411,7 +411,7 @@ function setTask() {
 
 function taskFormat(title, name, checked = false) {
     return `
-    <div class="task-name" title="Title: ${title}\nDate: ${new Date().toISOString().split('T')[0]}">
+    <div class="task-name">
         <input type="checkbox" class="checkbox" title="Mark as done" ${checked ? 'checked' : ''}>
         <div title="${title}" ${checked ? 'style="opacity: .5;"' : ''}>${checked ? `<s>${name}</s>` : name}</div>
     </div>
@@ -439,6 +439,75 @@ function escapeHTML(html) {
             '"': '&quot;',
             "'": '&#39;'
         }[match];
+    });
+}
+
+function alert(message, delay = 3000) {
+    const alert = document.createElement('div');
+    alert.classList.add('alert');
+    alert.textContent = message;
+    document.body.appendChild(alert);
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                alert.style.opacity = 1;
+                alert.style.transform = 'translate(-50%, -100%)';
+            }, delay / 30);
+        });
+    });
+
+    setTimeout(() => {
+        alert.style.opacity = 0;
+        alert.style.transform = 'translate(-50%, -200%)';
+        setTimeout(() => alert.remove(), delay);
+    }, delay);
+}
+
+function confirm(message) {
+    return new Promise(resolve => {
+        const modal = document.createElement('div');
+        modal.classList.add('modal');
+        modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>${escapeHTML(message)}</p>
+            </div>
+            <div class="modal-footer">
+                <button role="button" class="modal-cancel">Cancel</button>
+                <button role="button" class="modal-confirm accent">OK</button>
+            </div>
+        </div>
+        `;
+        document.body.appendChild(modal);
+
+        const content = modal.querySelector('.modal-content');
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                modal.style.opacity = 1;
+                content.style.transform = 'translate(-50%, -50%) scale(1)';
+            });
+        });
+
+        const cancel = modal.querySelector('.modal-cancel');
+        const confirm = modal.querySelector('.modal-confirm');
+        confirm.focus();
+
+        confirm.addEventListener('click', () => {
+            decision();
+            resolve(true);
+        });
+        cancel.addEventListener('click', () => {
+            decision();
+            resolve(false);
+        });
+
+        function decision(delay = 200) {
+            modal.style.opacity = 0;
+            content.style.transform = 'translate(-50%, -50%) scale(.8)';
+            setTimeout(() => modal.remove(), delay);
+        }
     });
 }
 
