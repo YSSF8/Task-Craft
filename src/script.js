@@ -28,6 +28,9 @@ tilebar.addEventListener('mouseup', () => {
 
 document.getElementById('minimize').addEventListener('click', () => {
     window.electron.send('minimize');
+    ipcRenderer.on('message', (event, arg) => {
+        console.log(arg); // prints "Your message here"
+    });
 });
 
 document.getElementById('close').addEventListener('click', quit);
@@ -51,6 +54,9 @@ toolbar.querySelectorAll('.tool').forEach((tool, index) => {
                     break;
                 case 'delete-all':
                     deleteAll();
+                    break;
+                case 'generative-ai':
+                    generateWithAI();
                     break;
             }
         });
@@ -165,6 +171,56 @@ function deleteAll() {
     }, 200);
 }
 
+async function generativeAI(prompt) {
+    try {
+        const response = await fetch('https://json-code-generative-ai.onrender.com', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'prompt': prompt
+            })
+        });
+        const data = await response.json();
+        return data;
+    } catch {
+        alert('Request was not successful');
+    }
+}
+
+function generateWithAI() {
+    confirm('<input type="text" placeholder="Prompt" class="user-prompt">').then(value => {
+        if (value) {
+            alert('Sending request');
+
+            const userPrompt = document.querySelector('.user-prompt').value;
+            generativeAI(userPrompt).then(gen => {
+                let allTasks = gen.code;
+
+                for (let task of allTasks) {
+                    let taskElement = document.createElement('div');
+                    taskElement.classList.add('task');
+                    taskElement.innerHTML = taskFormat(task.title, task._task, task.checked);
+                    taskElement.draggable = true;
+                    applyTaskFunctionalities(taskElement);
+                    content.appendChild(taskElement);
+                    document.querySelectorAll('.availability').forEach(avl => avl.remove());
+
+                    setTimeout(() => {
+                        taskElement.style.transform = 'scale(1)';
+                        taskElement.style.opacity = 1;
+                    });
+                }
+
+                alert('Request sent');
+            });
+        }
+    });
+    const prompt = document.querySelector('.modal-body p');
+    prompt.innerHTML = prompt.textContent;
+}
+
 let isFind = false;
 
 function find() {
@@ -222,9 +278,9 @@ document.addEventListener('keydown', e => {
     if (e.ctrlKey) {
         if (e.key === 's') save();
         if (e.key === 'o') open();
-        if (e.key === 'w') quit();
         if (e.key === 'f') find();
         if (e.key === 'Delete') deleteAll();
+        if (e.key === 'g') generateWithAI();
     }
 });
 
@@ -282,6 +338,7 @@ function applyTaskFunctionalities(task) {
         } else {
             checkbox.style.removeProperty('display');
             label.setAttribute('contenteditable', false);
+            label.textContent = label.textContent.trim();
             edit.innerHTML = editIcon;
             originalLabel = label.textContent;
             label.scrollLeft = 0;

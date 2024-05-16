@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, globalShortcut } = require('electron');
 const fs = require('fs');
 
 let mainWindow;
@@ -18,6 +18,10 @@ function createWindow() {
     });
 
     mainWindow.loadFile(`${__dirname}\\index.html`);
+
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+        if (input.control && input.key.toLowerCase() === 'w') event.preventDefault();
+    });
 }
 
 app.on('ready', createWindow);

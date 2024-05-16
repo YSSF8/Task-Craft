@@ -1,6 +1,6 @@
 {
   "name": "taskcraft",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "productName": "Task Craft",
   "description": "Task Craft",
   "main": "src/index.js",
