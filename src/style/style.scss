@@ -363,6 +363,10 @@ button {
         width: 4in;
         transition: transform 200ms;
 
+        .user-prompt {
+            width: calc(100% - 20px);
+        }
+
         .modal-footer {
             float: right;
 

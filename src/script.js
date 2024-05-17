@@ -193,7 +193,7 @@ function generateWithAI() {
     confirm('<input type="text" placeholder="Prompt" class="user-prompt">').then(value => {
         if (value) {
             alert('Sending request');
-
+            
             const userPrompt = document.querySelector('.user-prompt').value;
             generativeAI(userPrompt).then(gen => {
                 let allTasks = gen.code;
@@ -206,19 +206,20 @@ function generateWithAI() {
                     applyTaskFunctionalities(taskElement);
                     content.appendChild(taskElement);
                     document.querySelectorAll('.availability').forEach(avl => avl.remove());
-
+                    
                     setTimeout(() => {
                         taskElement.style.transform = 'scale(1)';
                         taskElement.style.opacity = 1;
                     });
                 }
-
+                
                 alert('Request sent');
             });
         }
     });
     const prompt = document.querySelector('.modal-body p');
     prompt.innerHTML = prompt.textContent;
+
 }
 
 let isFind = false;

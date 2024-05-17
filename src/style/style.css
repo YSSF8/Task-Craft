@@ -320,6 +320,9 @@ button:is(input):focus {
   width: 4in;
   transition: transform 200ms;
 }
+.modal .modal-content .user-prompt {
+  width: calc(100% - 20px);
+}
 .modal .modal-content .modal-footer {
   float: right;
 }
