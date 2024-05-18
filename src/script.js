@@ -190,10 +190,12 @@ async function generativeAI(prompt) {
 }
 
 function generateWithAI() {
+    if (isModalOpen) return;
+
     confirm('<input type="text" placeholder="Prompt" class="user-prompt">').then(value => {
         if (value) {
             alert('Sending request');
-            
+
             const userPrompt = document.querySelector('.user-prompt').value;
             generativeAI(userPrompt).then(gen => {
                 let allTasks = gen.code;
@@ -206,20 +208,25 @@ function generateWithAI() {
                     applyTaskFunctionalities(taskElement);
                     content.appendChild(taskElement);
                     document.querySelectorAll('.availability').forEach(avl => avl.remove());
-                    
+
                     setTimeout(() => {
                         taskElement.style.transform = 'scale(1)';
                         taskElement.style.opacity = 1;
                     });
                 }
-                
+
                 alert('Request sent');
             });
         }
     });
+
+    const promptInput = document.querySelector('.user-prompt');
+    if (promptInput) {
+        promptInput.focus();
+    }
+
     const prompt = document.querySelector('.modal-body p');
     prompt.innerHTML = prompt.textContent;
-
 }
 
 let isFind = false;
@@ -522,8 +529,17 @@ function alert(message, delay = 3000) {
     }, delay);
 }
 
+var isModalOpen = false;
+
 function confirm(message) {
     return new Promise(resolve => {
+        if (isModalOpen) {
+            resolve(false);
+            return;
+        }
+
+        isModalOpen = true;
+
         const modal = document.createElement('div');
         modal.classList.add('modal');
         modal.innerHTML = `
@@ -545,6 +561,11 @@ function confirm(message) {
             requestAnimationFrame(() => {
                 modal.style.opacity = 1;
                 content.style.transform = 'translate(-50%, -50%) scale(1)';
+                
+                const promptInput = modal.querySelector('.user-prompt');
+                if (promptInput) {
+                    promptInput.focus();
+                }
             });
         });
 
@@ -564,7 +585,10 @@ function confirm(message) {
         function decision(delay = 200) {
             modal.style.opacity = 0;
             content.style.transform = 'translate(-50%, -50%) scale(.8)';
-            setTimeout(() => modal.remove(), delay);
+            setTimeout(() => {
+                modal.remove();
+                isModalOpen = false;
+            }, delay);
         }
     });
 }
